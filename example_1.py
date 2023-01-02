@@ -1,8 +1,8 @@
 import numpy as np
 import inspect
 
-gradient_step = 0.003
-method_coefficient = 0.1
+gradient_step = 0.001
+method_coefficient = 0.01
 
 
 def goal_function(x, parameters):
@@ -38,24 +38,35 @@ if __name__ == '__main__':
     print('Now assume initial conditions:')
     print('Initial parameter of our model is: ', x0)
 
-    model_p = [2, 3, -6]
+    model_p = [23, 12, -6]
     print('function parameters (polynomial coefficients): ', model_p)
 
     print("Let's make some steps:")
 
     x_prediction = x0
-    for i in range(10):
-        print('x = {:10.4f}, f(x) = {:10.4f}, gradient = {:10.4f}'.format(x_prediction,
-                                                                          goal_function(x_prediction, model_p),
-                                                                          gradient(x_prediction, model_p)))
+    f_previous = goal_function(x0, model_p)
+    i = 0
+    error = 10
+    while error > 1e-8:
+        print('step {:2d}: x = {:10.6f}, f(x) = {:10.6f}, gradient = {:10.6f}'.format(i,
+                                                                                      x_prediction,
+                                                                                      goal_function(x_prediction,
+                                                                                                    model_p),
+                                                                                      gradient(x_prediction, model_p)))
         x_prediction = x_prediction - method_coefficient * gradient(x_prediction, model_p)
+        if (goal_function(x_prediction, model_p) - f_previous) < 1e-2 * f_previous:
+            method_coefficient = method_coefficient / 2.0
+        error = abs((f_previous - goal_function(x_prediction, model_p)) / f_previous)
+        f_previous = goal_function(x_prediction, model_p)
+        print('error: {:0.9f}'.format(error))
+        i += 1
 
     print()
     print('*' * 60)
     print()
     print('Latest prediction:')
-    print('x = {:10.4f}, f(x) = {:10.4f}, gradient = {:10.4f}'.format(x_prediction,
+    print('x = {:10.6f}, f(x) = {:10.6f}, gradient = {:10.6f}'.format(x_prediction,
                                                                       goal_function(x_prediction, model_p),
                                                                       gradient(x_prediction, model_p)))
 
-    print('True minimum for function is: {:10.4f}'.format(-model_p[1] / 2.0 / model_p[0]))
+    print('True minimum for function is: {:10.6f}'.format(-model_p[1] / 2.0 / model_p[0]))
